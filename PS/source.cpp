@@ -8,7 +8,7 @@ using namespace std;
 int dx[4] = {-1, 0, 1, 0};
 int dy[4] = {0, -1, 0, 1};
 
-map<int, bool> dp;
+map<int, int> dp;
 
 int mapToNumber(vector< vector<int> >& map)
 {
@@ -25,32 +25,6 @@ int mapToNumber(vector< vector<int> >& map)
 	return atoi(s.c_str());
 }
 
-bool valid(vector< vector<int> >& map)
-{
-	int arr[3][3] =
-	{
-		{ 1, 2, 3},
-		{ 4, 5, 6},
-		{ 7, 8, 0}
-	};
-
-	bool ret = true;
-
-	for(int i=0; i<3; i++)
-	{
-		for(int j=0; j<3; j++)
-		{
-			if(map[i][j] != arr[i][j])
-			{
-				ret = false;
-				break;
-			}
-		}
-	}
-
-	return ret;
-}
-
 pair<int, int> findZero(vector< vector<int> >& map)
 {
 	for(int i=0; i<3; i++)
@@ -63,7 +37,7 @@ pair<int, int> findZero(vector< vector<int> >& map)
 	}
 }
 
-int search(vector< vector<int> > map, int start)
+void search(vector< vector<int> > map, int start)
 {
 	int ret = 0;
 	bool find = false;
@@ -72,9 +46,11 @@ int search(vector< vector<int> > map, int start)
 
 	while(!q.empty())
 	{
-		vector< vector< int > > temp = q.front();
+		vector< vector< int > > puzzle = q.front();
 		q.pop();
-		pair<int, int> zero = findZero(temp);
+		pair<int, int> zero = findZero(puzzle);
+
+		int num = dp[mapToNumber(puzzle)];
 
 		for(int k=0; k<4; k++)
 		{
@@ -83,28 +59,38 @@ int search(vector< vector<int> > map, int start)
 
 			if(nx < 0 || nx >= 3 || ny < 0 || ny >= 3) continue;
 
-			int t = temp[nx][ny];
-			temp[nx][ny] = temp[zero.first][zero.second];
-			temp[zero.first][zero.second] = t;
+			vector< vector<int> > copyPuzzle(3, vector<int>(3, 0));
 
-			if(dp.count(mapToNumber(temp)) != 0) continue;
-
-			if(!valid(temp))
+			for (int i = 0; i < 3; i++)
 			{
-				q.push(temp);
+				for (int j = 0; j < 3; j++)
+				{
+					copyPuzzle[i][j] = puzzle[i][j];
+				}
+			}
+
+			int temp = copyPuzzle[nx][ny];
+			copyPuzzle[nx][ny] = copyPuzzle[zero.first][zero.second];
+			copyPuzzle[zero.first][zero.second] = temp;
+
+			int ret = mapToNumber(copyPuzzle);
+			if (dp.count(ret) != 0) continue;
+
+			if (ret != 123456780)
+			{
+				q.push(copyPuzzle);
+				dp.insert(make_pair(ret, num + 1));
 			}
 			else
 			{
+				dp.insert(make_pair(ret, num + 1));
 				find = true;
 				break;
 			}
 		}
 
-		ret++;
-		if(find) break;
+		if (find) break;
 	}
-
-	return ret; 
 }
 int main()
 {
@@ -119,9 +105,12 @@ int main()
 	}
 
 	int start = mapToNumber(map);
-	dp.insert(make_pair(mapToNumber(map), true));
-	int min = search(map, start);
+	dp.insert(make_pair(mapToNumber(map), 0));
+	search(map, start);
 
-	cout << min << endl;
+	if (dp.count(123456780) == 0)
+		cout << -1 << endl;
+	else
+		cout << dp[123456780] << endl;
 	return 0;
 }
