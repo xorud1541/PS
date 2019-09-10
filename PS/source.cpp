@@ -1,88 +1,23 @@
 #include <iostream>
-#include <queue>
 #include <vector>
+#include <queue>
 #include <map>
-#define MAX		101
+#define MAX		100
 using namespace std;
 int n;
 
-vector< vector<int> > vecMap(MAX, vector<int>(MAX, 0));
-vector< pair<int, int> > islands[100];
+std::map<pair<int, int>, int> islands; 
+vector< vector<int> > maps(MAX + 1, vector<int>(MAX + 1, 0));
+
 int dx[4] = {-1, 0, 1, 0};
 int dy[4] = {0, -1, 0, 1};
 
-int bfs(pair<int, int> start, vector< vector<bool> >& visited)
+void region(int x, int y, vector< vector<bool> >& visited, int num)
 {
-	int ret = 0;
-	bool find = false;
 	queue<pair<int, int>> q;
-	vector< vector<int> > dis(n, vector<int>(n, 0)); 
-	q.push(start);
-
-	while (!q.empty())
-	{
-		pair<int, int> node = q.front();
-		q.pop();
-		for(int k=0; k<4; k++)
-		{
-			int nx = node.first + dx[k];
-			int ny = node.second + dy[k];
-
-			if(nx < 0 || nx >= n || ny < 0 || ny >= n) continue;
-
-			if(!visited[nx][ny])
-			{
-				if(vecMap[nx][ny] == 1)
-				{
-					ret = dis[node.first][node.second] + 1;
-					find = true;
-					break;
-				}
-				else
-				{
-					dis[nx][ny] = dis[node.first][node.second] + 1;
-					visited[nx][ny] = true;
-				}
-			}	
-		}
-
-		if(find) break;
-	}
-
-	return ret;
-}
-
-int getDistance(int index)
-{
-	int ret = 100 * 100;
-	vector< vector<bool> > previsited(n, vector<bool>(n, false));
-
-	for(int i=0; i<islands[index].size(); i++)
-	{
-		pair<int, int> node = islands[index][i];
-		previsited[node.first][node.second] = true;
-	}
-
-	for(int i=0; i<islands[index].size(); i++)
-	{
-		vector< vector<bool> > visited(previsited);
-		int dist = bfs(islands[index][i], visited);
-		if(dist == 0) continue;
-
-		if(ret > dist)
-			ret = dist;
-	}
-	return ret;
-}
-
-void search(int x, int y, int numbering)
-{
-	vector< vector<bool> > visited(n, vector<bool>(n, false));
-
-	queue< pair<int, int> > q;
 	q.push(make_pair(x, y));
-	islands[numbering].push_back(make_pair(x,y));
 	visited[x][y] = true;
+	islands.insert(make_pair(make_pair(x, y), num));
 
 	while(!q.empty())
 	{
@@ -96,50 +31,103 @@ void search(int x, int y, int numbering)
 
 			if(nx < 0 || nx >= n || ny < 0 || ny >= n) continue;
 
-			if(vecMap[nx][ny] == 0) continue;
-
-			if(vecMap[nx][ny] == 1 && visited[nx][ny] == false)
+			if(!visited[nx][ny] && maps[nx][ny] == 1)
 			{
 				visited[nx][ny] = true;
 				q.push(make_pair(nx, ny));
-				islands[numbering].push_back(make_pair(nx, ny));
+				islands.insert(make_pair(make_pair(nx, ny), num));
 			}
-			
 		}
 	}
+}
+
+int getDis(int x, int y, int num)
+{
+	int ret = 0; 
+
+	vector< vector<bool> > visited(n, vector<bool>(n, false));
+	vector< vector<int> > ans(n, vector<int>(n, 0));
+	queue<pair<int, int>> q;
+
+	q.push(make_pair(x, y));
+	visited[x][y] = true;
+	bool find = false;
+
+	while(!q.empty())
+	{
+		pair<int, int> node = q.front();
+		q.pop();
+
+		for(int k=0; k<4; k++)
+		{
+			int nx = node.first + dx[k];
+			int ny = node.second + dy[k];
+
+			if(nx < 0 || nx >= n || ny < 0 || ny >= n) continue;
+
+			if(maps[nx][ny] == 1 && visited[nx][ny] == false && islands[make_pair(nx, ny)] != num)
+			{
+				visited[nx][ny] = true;
+				ans[nx][ny] = ans[node.first][node.second] + 1;
+				ret = ans[node.first][node.second];
+				find  = true;
+				break;
+			}
+
+			if(maps[nx][ny] == 0 && visited[nx][ny] == false)
+			{
+				visited[nx][ny] = true;
+				ans[nx][ny] = ans[node.first][node.second] + 1;
+				q.push(make_pair(nx, ny));
+			}
+		}
+
+		if(find) break;
+	}
+	return ret;
 }
 
 int main()
 {
 	cin >> n;
 
-	for(int i=0; i<10; i++)
+	for(int i=0; i<n; i++)
 	{
-		for(int j=0; j<10; j++)
+		for(int j=0; j<n; j++)
 		{
-			cin >> vecMap[i][j];
+			cin >> maps[i][j];
 		}
 	}
 
-	int numbering = 1;
+	vector< vector<bool> > visited(n, vector<bool>(n, false));
+	int num = 1;
 	for(int i=0; i<n; i++)
 	{
-		for(int j=0; j<n; n++)
+		for(int j=0; j<n; j++)
 		{
-			if(vecMap[i][j] && islands[numbering].size() == 0)
+			if(maps[i][j] == 1 && visited[i][j] == false) 
 			{
-				search(i,j, numbering);
-				numbering++;
+				region(i, j, visited, num); 
+				num++;
 			}
 		}
 	}
 
-    int ans = 100 * 100; 
-	for(int i=1; i<=numbering; i++)
+	int ans = 100 * 100;
+	for(int i=0; i<n; i++)
 	{
-		int ret = getDistance(i);
-		if(ret < ans)
-			ans = ret;
+		for(int j=0; j<n; j++)
+		{
+			if(maps[i][j] == 1)
+			{
+				int num = islands[make_pair(i, j)];
+				int ret = getDis(i, j, num);
+				if(ret == 0) continue;
+
+				if(ret < ans)
+					ans = ret;
+			}
+		}
 	}
 
 	cout << ans << endl;
