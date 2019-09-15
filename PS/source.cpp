@@ -1,42 +1,32 @@
 #include <iostream>
-#include <algorithm>
-
-#define MAX	1000000
-
+#define MAX		11
 using namespace std;
 
-int dp[MAX + 1];
-int n;
+int T;
+int dp[MAX];
 
 int go(int n)
 {
-	if (n == 1)
+	if (n == 0)
+		return 1;
+	else if (n < 0)
 		return 0;
 
 	int& ret = dp[n];
 	if (ret != 0) return ret;
 
-	if (n % 3 == 0 && n - 1 > 0) 
-	{
-		ret = min(1 + go(n - 1), 1 + go(n / 3));
-	}
-	else if (n % 2 == 0 && n - 1 > 0)
-	{
-		ret = min(1 + go(n - 1), 1 + go(n / 2));
-	}
-	else
-	{
-		ret = 1 + go(n - 1);
-	}
-
-	return ret;
+	return ret = go(n - 1) + go(n - 2) + go(n - 3);
 }
 
 int main()
 {
-	cin >> n;
+	cin >> T;
+	while (T--)
+	{
+		int n;
+		cin >> n;
 
-	cout << go(n) << endl;
-
+		cout << go(n) << endl;
+	}
 	return 0;
 }
