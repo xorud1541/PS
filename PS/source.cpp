@@ -1,30 +1,42 @@
 #include <iostream>
-#define MOD		1000000000
-#define MAX		100
+#include <algorithm>
+
+#define MAX	1000000
+
 using namespace std;
 
-long long dp[MAX + 1][10 + 1];
+int dp[MAX + 1];
+int n;
+
+int go(int n)
+{
+	if (n == 1)
+		return 0;
+
+	int& ret = dp[n];
+	if (ret != 0) return ret;
+
+	if (n % 3 == 0 && n - 1 > 0) 
+	{
+		ret = min(1 + go(n - 1), 1 + go(n / 3));
+	}
+	else if (n % 2 == 0 && n - 1 > 0)
+	{
+		ret = min(1 + go(n - 1), 1 + go(n / 2));
+	}
+	else
+	{
+		ret = 1 + go(n - 1);
+	}
+
+	return ret;
+}
 
 int main()
 {
-	int n;
 	cin >> n;
 
-	for (int i = 1; i <= 9; i++) dp[1][i] = 1;
+	cout << go(n) << endl;
 
-	for (int i = 2; i <= n; i++)
-	{
-		for (int j = 0; j < 10; j++)
-		{
-			if (j - 1 >= 0) dp[i][j] += dp[i - 1][j - 1] % MOD;
-			if (j + 1 < 10) dp[i][j] += dp[i - 1][j + 1] % MOD;
-		}
-	}
-
-	long long ans = 0;
-	for (int i = 0; i < 10; i++)
-		ans += dp[n][i];
-
-	cout << ans << endl;
 	return 0;
 }
