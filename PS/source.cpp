@@ -1,32 +1,40 @@
 #include <iostream>
-#define MAX		11
+#include <algorithm>
+#define MAX		300
+
 using namespace std;
 
-int T;
-int dp[MAX];
-
-int go(int n)
-{
-	if (n == 0)
-		return 1;
-	else if (n < 0)
-		return 0;
-
-	int& ret = dp[n];
-	if (ret != 0) return ret;
-
-	return ret = go(n - 1) + go(n - 2) + go(n - 3);
-}
+int dp[MAX + 1];
+int score[MAX + 1];
 
 int main()
 {
-	cin >> T;
-	while (T--)
+	int n;
+	cin >> n;
+	for (int i = 1; i <= n; i++)
 	{
-		int n;
-		cin >> n;
-
-		cout << go(n) << endl;
+		cin >> score[i];
 	}
+
+	dp[1] = score[1];
+
+	for (int i = 2; i <= n; i++)
+	{
+		if (i == 2)
+		{
+			dp[2] = score[2] + score[1];
+		}
+		else if (i == 3)
+		{
+			dp[3] = max(score[1] + score[3], score[2] + score[3]);
+		}
+		else
+		{
+			dp[i] = score[i] + max(dp[i - 3] + score[n - 1], dp[i - 2] + score[n - 1]);
+		}
+	}
+
+	cout << dp[n] << endl;
+
 	return 0;
 }
