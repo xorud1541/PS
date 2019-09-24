@@ -1,21 +1,66 @@
 #include <iostream>
-#define MAX  1000
+#include <vector>
+#include <queue>
+#define MAX  50
+
 using namespace std;
-
-int dp[MAX+1];
-
+int n;
+vector<int> nodes[MAX + 1];
+bool visited[MAX + 1];
 int main()
 {
-	int n;
 	cin >> n;
+	int parent;
+	for (int i = 0; i < n; i++)
+	{
+		int node;
+		cin >> node;
+		if (node == -1)
+		{
+			parent = i;
+			continue;
+		}
 
-	dp[1] = 1;
-	dp[2] = 2;
+		nodes[node].push_back(i);
+		nodes[i].push_back(node);
+	}
 
-	for(int i=3; i<=n; i++)
-		dp[i] = (dp[i-1] + dp[i-2]) % 10007;
+	int drop;
+	cin >> drop;
 
-	cout << dp[n] % 10007 << endl;
+	queue<int> q;
+	q.push(parent);
+	visited[parent] = true;
 
+	if (parent == drop)
+		cout << 0 << endl;
+	else
+	{
+		int ans = 0;
+		while (!q.empty())
+		{
+			int next = q.front();
+			q.pop();
+
+			bool isleaf = true;
+			for (int i = 0; i < nodes[next].size(); i++)
+			{
+				int x = nodes[next][i];
+				if (!visited[x])
+				{
+					if (x == drop) continue;
+
+					visited[x] = true;
+					q.push(x);
+					isleaf = false;
+				}
+			}
+
+			if (isleaf)
+				ans++;
+		}
+
+		cout << ans << endl;
+	}
 	return 0;
 }
