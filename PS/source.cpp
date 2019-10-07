@@ -30,6 +30,37 @@ int main()
 		sumes.push_back(sum);
 	}
 
-	
+	int low = -1;
+	int high = 0;
+	int ans = 0;
+
+	while(high < primes.size())
+	{
+		int ret;
+		if(low == -1)
+		{
+			ret = sumes[high];
+		}
+		else
+		{
+			ret = sumes[high] - sumes[low];
+		}
+
+		if(ret > n)
+		{
+			low++;
+		}
+		else if(ret < n)
+		{
+			high++;
+		}
+		else
+		{//ret == n
+			ans++;
+			low++;
+		}
+	}
+
+	cout << ans << endl;
 	return 0;
 }
