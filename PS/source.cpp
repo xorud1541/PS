@@ -1,35 +1,29 @@
 #include <iostream>
-#include <vector>
-#define MAX		4000000+1
-using namespace std;
+#include <algorithm>
+
+#define MAX		100000
+
+int dp[MAX + 1];
 int n;
-vector<int> primes;
-vector<int> sumes;
+
+using namespace std;
+
 int main()
 {
 	cin >> n;
-	vector<bool> check(MAX, true);
-	for (int i = 2; i*i <= n; i++)
+
+	for (int i = 1; i*i <= n; i++)
+		dp[i * i] = 1;
+
+	for (int i = 1; i <= n; i++)
 	{
-		if (!check[i]) continue;
-		for (int j = i * i; j <= n; j += i)
+		if (dp[i] == 0) dp[i] = i;
+		for (int k = 1; k*k < i; k++)
 		{
-			check[j] = false;
+			dp[i] = min(dp[i], dp[i - k * k] + 1);
 		}
 	}
 
-	for (int i = 2; i <= n; i++)
-	{
-		if (check[i]) primes.push_back(i);
-	}
-
-	int sum = 0;
-	for (int i = 0; i < primes.size(); i++)
-	{
-		sum += primes[i];
-		sumes.push_back(sum);
-	}
-
-	
+	cout << dp[n] << endl;
 	return 0;
 }
