@@ -1,29 +1,49 @@
 #include <iostream>
-#include <algorithm>
+#include <string>
 
-#define MAX		100000
 using namespace std;
 
-int n;
-int dp[MAX + 1];
-
-int main()
+int cntPattern(string& s)
 {
-	cin >> n;
-	for(int i=0; i<MAX; i++)
-		dp[i] = MAX;
+	int ans = 1;
+	string pattern;
+	pattern.push_back(s[0]);
 
-	for(int i=1; i*i<n; i++)
-		dp[i*i] = 1;
+	int size = s.size();
 
-	for(int i=1; i <= n; i++)
+	int index = 1;
+	while(index < size)
 	{
-		for(int k=1; k*k<i; k++)
+		string cmp = s.substr(index, pattern.size());
+		if(cmp == pattern) // 패턴이랑 같은 경우
 		{
-			dp[i] = min(dp[i], dp[i - k*k] + 1);
+			index = index + pattern.size();
+			ans++;
+		}
+		else // 아닌 경우
+		{
+			ans = 1;
+			index = index + pattern.size();
+			pattern.clear();
+			pattern = s.substr(0, index); // 패턴 갱신 
+
 		}
 	}
 
-	cout << dp[n] << endl;
+	return ans;
+}
+
+int main()
+{
+	string s;
+	while(1)
+	{
+		cin >> s;
+		if(s == ".") break;
+		else
+		{
+			cout << cntPattern(s) << endl;
+		}
+	}
 	return 0;
 }
